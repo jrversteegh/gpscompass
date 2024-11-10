@@ -1,0 +1,63 @@
+[tool.poetry]
+name = "gpscompass"
+version = "0.1.0"
+description = "GPS RTK Compass "
+authors = ["Jaap Versteegh <j.r.versteegh@gmail.com>"]
+license = "GPL3"
+readme = "README.rst"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+west = "^1.2.0"
+gcovr = "^7.2"
+clang-format = "^18.1.8"
+pytest-cov = "^5.0.0"
+pytest-mock = "^3.14.0"
+pytest = "^8.3.2"
+invoke = "^2.2.0"
+isort = "^5.13.2"
+black = "^24.8.0"
+ipython = "^8.26.0"
+flake8 = "^7.1.1"
+flake8-black = "^0.3.6"
+flake8-isort = "^6.1.1"
+flake8-junit-report = "^2.1.0"
+pyelftools = "^0.31"
+tomli = "^2.0.1"
+gitpython = "^3.1.43"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+extend_exclude = ''
+
+[tool.isort]
+profile = "black"
+known_first_party = ["imubar"]
+skip = ["__init__.py"]
+extend_skip_glob = ["venv", ".venv", "__init__.py"]
+
+[tool.pytest.ini_options]
+mock_use_standalone_module = true
+testpaths = ["tests/imubar"]
+addopts = """\
+    --cov-report=term-missing:skip-covered \
+    --cov-report=html \
+    --cov-report=xml \
+    """
+filterwarnings = [
+    "ignore:The hookimpl CovPlugin:DeprecationWarning"
+]
+
+[tool.coverage.run]
+source = ["src/gpscompass"]
+branch = true
+omit = []
+
+[tool.coverage]
+html = { directory = "build/reports/coverage-html"}
+xml = { output = "build/reports/coverage.xml"}
