@@ -1,0 +1,11 @@
+description: |
+    Analog input channel.
+
+compatible: analog-input
+
+include: base.yaml
+
+properties:
+    io-channels:
+        type: phandle-array
+        required: true

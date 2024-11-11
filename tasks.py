@@ -66,7 +66,7 @@ def update_revision(ctx):
 @task(update_revision)
 def build(ctx):
     """Build"""
-    for cmd in ("west build -p auto .",):
+    for cmd in ("west build -b esp32_devkitc_wroom --sysbuild .",):
         ctx.run(cmd, echo=True)
 
 
@@ -75,7 +75,7 @@ def rebuild(ctx):
     """Build"""
     for cmd in (
         "rm -rf build",
-        "west build -p auto .",
+        "west build -b esp32_devkitc_wroom --sysbuild .",
     ):
         ctx.run(cmd, echo=True)
 
