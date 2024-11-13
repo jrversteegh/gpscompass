@@ -13,14 +13,17 @@ if (NOT DEFINED ${BOARD})
   set(BOARD blackpill_f411ce)
 endif()
 
+if (NOT DEFINED ${BOARD})
 set(SHIELD sh1106)
+#set(SHIELD ssd1306)
+endif()
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 # Include some zephyr cmake extensions
 include(${ZEPHYR_BASE}/cmake/modules/extensions.cmake)
 
-project(imubar)
+project(display_test)
 
 FILE(GLOB app_sources src/*.cpp)
 target_sources(app PRIVATE ${app_sources})
