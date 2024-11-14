@@ -21,4 +21,5 @@ include(${ZEPHYR_BASE}/cmake/modules/extensions.cmake)
 project(rtc_test)
 
 FILE(GLOB app_sources src/*.cpp)
+#FILE(GLOB app_sources src/*.c)
 target_sources(app PRIVATE ${app_sources})

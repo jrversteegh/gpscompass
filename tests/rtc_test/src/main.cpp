@@ -4,13 +4,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <stdio.h>
-
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/counter.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/drivers/rtc/maxim_ds3231.h>
+
+#include <stdio.h>
+
+#include "compile_time.h"
+
+#define K_POLL_EVENT_INIT(_event_type, _event_mode) \
+        { \
+        .poller = NULL, \
+        .type = _event_type, \
+        .state = K_POLL_STATE_NOT_READY, \
+        .mode = _event_mode, \
+        .unused = 0, \
+        }
 
 /* Format times as: YYYY-MM-DD HH:MM:SS DOW DOY */
 static const char *format_time(time_t time,
@@ -88,7 +99,7 @@ void timespec_add(struct timespec *apb,
 {
 	apb->tv_nsec = a->tv_nsec + b->tv_nsec;
 	apb->tv_sec = a->tv_sec + b->tv_sec;
-	if (apb->tv_nsec >= NSEC_PER_SEC) {
+	if (apb->tv_nsec >= (int)NSEC_PER_SEC) {
 		apb->tv_sec += 1;
 		apb->tv_nsec -= NSEC_PER_SEC;
 	}
@@ -135,7 +146,7 @@ static void min_alarm_handler(const struct device *dev,
 
 	ts->tv_sec += adj.tv_sec;
 	ts->tv_nsec += adj.tv_nsec;
-	if (ts->tv_nsec >= NSEC_PER_SEC) {
+	if (ts->tv_nsec >= (int)NSEC_PER_SEC) {
 		ts->tv_sec += 1;
 		ts->tv_nsec -= NSEC_PER_SEC;
 	}
@@ -178,36 +189,31 @@ static void show_counter(const struct device *ds3231)
  */
 static void set_aligned_clock(const struct device *ds3231)
 {
-	if (!IS_ENABLED(CONFIG_APP_SET_ALIGNED_CLOCK)) {
-		return;
-	}
-
 	uint32_t syncclock_Hz = maxim_ds3231_syncclock_frequency(ds3231);
 	uint32_t syncclock = maxim_ds3231_read_syncclock(ds3231);
-	uint32_t now = 0;
-	int rc = counter_get_value(ds3231, &now);
+	uint32_t now = compile_time_epoch;
+    // int rc = counter_get_value(ds3231, &now);
 	uint32_t align_hour = now + 3600 - (now % 3600);
 
 	struct maxim_ds3231_syncpoint sp = {
 		.rtc = {
 			.tv_sec = align_hour,
-			.tv_nsec = (uint64_t)NSEC_PER_SEC * syncclock / syncclock_Hz,
+			.tv_nsec = static_cast<long int>((uint64_t)NSEC_PER_SEC * syncclock / syncclock_Hz),
 		},
 		.syncclock = syncclock,
 	};
 
 	struct k_poll_signal ss;
 	struct sys_notify notify;
-	struct k_poll_event sevt = K_POLL_EVENT_INITIALIZER(K_POLL_TYPE_SIGNAL,
-							    K_POLL_MODE_NOTIFY_ONLY,
-							    &ss);
+	struct k_poll_event sevt = K_POLL_EVENT_INIT(K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY);
+    sevt.typed_K_POLL_TYPE_SIGNAL = &ss;
 
 	k_poll_signal_init(&ss);
 	sys_notify_init_signal(&notify, &ss);
 
 	uint32_t t0 = k_uptime_get_32();
 
-	rc = maxim_ds3231_set(ds3231, &sp, &notify);
+	int rc = maxim_ds3231_set(ds3231, &sp, &notify);
 
 	printk("\nSet %s at %u ms past: %d\n", format_time(sp.rtc.tv_sec, sp.rtc.tv_nsec),
 	       syncclock, rc);
@@ -264,9 +270,8 @@ int main(void)
 	struct k_poll_signal ss;
 	struct sys_notify notify;
 	struct maxim_ds3231_syncpoint sp = { 0 };
-	struct k_poll_event sevt = K_POLL_EVENT_INITIALIZER(K_POLL_TYPE_SIGNAL,
-							    K_POLL_MODE_NOTIFY_ONLY,
-							    &ss);
+	struct k_poll_event sevt = K_POLL_EVENT_INIT(K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY);
+    sevt.typed_K_POLL_TYPE_SIGNAL = &ss;
 
 	k_poll_signal_init(&ss);
 	sys_notify_init_signal(&notify, &ss);
