@@ -5,17 +5,32 @@
  */
 
 / {
-	chosen {
-		zephyr,display = &sh1106_sh1106_128x64;
-	};
+      chosen {
+              zephyr,display = &sh1106_128_64_0;
+      };
 };
+
 
 &i2c1 {
 	status = "okay";
 
-	sh1106_sh1106_128x64: ssd1306@3c {
+	sh1106_128_64_0: ssd1306@3c {
 		compatible = "sinowealth,sh1106";
 		reg = <0x3c>;
+		width = <128>;
+		height = <64>;
+		segment-offset = <2>;
+		page-offset = <0>;
+		display-offset = <0>;
+		multiplex-ratio = <63>;
+		segment-remap;
+		com-invdir;
+		prechargep = <0x22>;
+	};
+
+	sh1106_128_64_1: ssd1306@3d {
+		compatible = "sinowealth,sh1106";
+		reg = <0x3d>;
 		width = <128>;
 		height = <64>;
 		segment-offset = <2>;
