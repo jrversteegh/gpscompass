@@ -1,0 +1,8 @@
+Scanning I2C addresses...
+Data read from device 0x30: 0x00 0x00: MMC5983MA Magn
+Data read from device 0x68: 0x24 0x21: BMI270 Accel + Gyro
+Data read from device 0x69: 0xEA 0x00: ICM20948 Accel + Gyro + Magn
+Data read from device 0x6A: 0x00 0x00: ISM330DHCX Accel + Gyro
+Data read from device 0x6B: 0x00 0x00: LSM6DSV16X Accel + Gyro
+Done!
+
